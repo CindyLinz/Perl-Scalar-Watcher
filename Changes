@@ -1,6 +1,5 @@
 Revision history for Perl extension Scalar::Watcher.
 
-0.01  Fri Sep  5 11:49:43 2014
-	- original version; created by h2xs 1.23 with options
-		-n Scalar::Watcher
+0.1  2014.9.5
+     First version released.
 

@@ -23,11 +23,10 @@ XSLoader::load('Scalar::Watcher', $VERSION);
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
-Scalar::Watcher - watch a scalar variable when value changed or freed
+Scalar::Watcher - watch a scalar variable when setting value
 
 =head1 SYNOPSIS
 
@@ -57,34 +56,56 @@ Scalar::Watcher - watch a scalar variable when value changed or freed
     # catch 456
   }
 
+  {
+    # you can bind multiple watchers on one variable
+    my $a = 123;
+    my $canceller1 = when_modified $a, sub { ... };
+    my $canceller2 = when_modified $a, sub { ... };
+    $a = 456;
+
+    # and turn off one of them at anytime
+    undef $canceller1;
+    $a = 789;
+  }
+
 =head1 DESCRIPTION
 
-Stub documentation for Scalar::Watcher, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+Create watchers to monitor a scalar variable after setting the variable.
 
 =head2 EXPORT
 
-None by default.
+=over 4
 
+=item when_modified $variable, $handler
+=item $canceller = when_modified $variable, $handler
 
+The $handler should be a sub reference, that will be invoked after
+each time the $variable is set.
+The $variable will be the first argument when the $handler is invoked.
+
+If when_modified is invoked at void context, the watcher will be active
+until the end of $variable's life; otherwise, it'll return a reference to a canceller,
+to cancel this watcher when the canceller is garbage collected.
+
+The canceller will hold a weaken reference to the $variable.
+Holding the canceller only will not prevent $variable itself from garbage collected.
+
+There could be more than one watchers on the same variable,
+the notifying order is not specified. It's better not to change
+the value of the watched variable if there are more than one watchers on it.
+
+There's also a good practice not to access the watched variable directly
+in the handler, or you should remember to solve the circular references.
+
+=back
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+github: L<https://github.com/CindyLinz/Perl-Scalar-Watcher>
 
 =head1 AUTHOR
 
-Cindy Wang (CindyLinz), E<lt>cindy@cpan.orgE<gt>
+Cindy Wang (CindyLinz)
 
 =head1 COPYRIGHT AND LICENSE
 
