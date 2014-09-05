@@ -4,6 +4,7 @@ Scalar::Watcher - watch a scalar variable when setting value
 
 # SYNOPSIS
 
+```perl
     use Scalar::Watcher qw(when_modified);
 
     {
@@ -41,6 +42,7 @@ Scalar::Watcher - watch a scalar variable when setting value
       undef $canceller1;
       $a = 789;
     }
+```
 
 # DESCRIPTION
 
