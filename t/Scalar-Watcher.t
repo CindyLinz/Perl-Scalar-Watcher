@@ -8,10 +8,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More tests => 3;
 BEGIN {
     use_ok('Scalar::Watcher');
-    Scalar::Watcher->import(qw(when_modified when_freed));
+    Scalar::Watcher->import(qw(when_modified));
 };
 
 #########################
@@ -31,7 +31,5 @@ my @out;
         $a = 'abc';
         is($out, 'abc', "when_modified");
 
-        when_freed $a, sub { $out = "freed $_[0]" };
     }
-    is($out, 'freed abc', 'when_freed');
 }

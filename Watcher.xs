@@ -34,9 +34,6 @@ static int watcher_handler(pTHX_ SV * sv, MAGIC * mg){
 static MGVTBL modified_vtbl = {
     0, watcher_handler, 0, 0, 0
 };
-static MGVTBL freed_vtbl = {
-    0, 0, 0, 0, watcher_handler
-};
 
 MODULE = Scalar::Watcher		PACKAGE = Scalar::Watcher		
 
@@ -49,11 +46,3 @@ when_modified(SV * target, SV * handler)
         CV * handler_cv;
         SvUPGRADE(target, SVt_PVMG);
         sv_magicext(target, extract_cv(aTHX_ handler), PERL_MAGIC_ext, &modified_vtbl, NULL, 0);
-
-SV *
-when_freed(SV * target, SV * handler)
-    PROTOTYPE: $&
-    CODE:
-        CV * handler_cv;
-        SvUPGRADE(target, SVt_PVMG);
-        sv_magicext(target, extract_cv(aTHX_ handler), PERL_MAGIC_ext, &freed_vtbl, NULL, 0);

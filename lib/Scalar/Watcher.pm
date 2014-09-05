@@ -10,7 +10,7 @@ use AutoLoader;
 
 our @ISA = qw(Exporter);
 
-our @EXPORT_OK = qw(when_modified when_freed);
+our @EXPORT_OK = qw(when_modified);
 
 our $VERSION = '0.001';
 
@@ -37,14 +37,12 @@ Scalar::Watcher - watch a scalar variable when value changed or freed
     my $a = 123;
     $a = 456;
     when_modified $a, sub { print "catch $_[0]\n" };
-    when_freed $a, sub { print "freed $_[0]\n" };
     $a = 'oo';
     $a = 567;
 
     # then you'll get
     # catch oo
     # catch 567
-    # freed 567
   }
 
   {
