@@ -1,0 +1,10 @@
+Changes
+Makefile.PL
+MANIFEST
+ppport.h
+README
+Watcher.xs
+t/Scalar-Watcher.t
+fallback/const-c.inc
+fallback/const-xs.inc
+lib/Scalar/Watcher.pm
