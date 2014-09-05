@@ -10,7 +10,7 @@ use AutoLoader;
 
 our @ISA = qw(Exporter);
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+our @EXPORT_OK = qw(when_modified when_freed);
 
 our $VERSION = '0.001';
 
