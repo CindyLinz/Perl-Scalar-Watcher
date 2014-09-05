@@ -8,7 +8,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3;
+use Test::More tests => 4;
 BEGIN {
     use_ok('Scalar::Watcher');
     Scalar::Watcher->import(qw(when_modified when_freed));
@@ -22,11 +22,16 @@ BEGIN {
 my @out;
 {
     my $out;
-    my $a = 123;
-    $a = 456;
-    when_modified $a, sub { $out = $_[0] };
-    $a = 789;
-    is($out, 789, "when_modified");
-    $a = 'abc';
-    is($out, 'abc', "when_modified");
+    {
+        my $a = 123;
+        $a = 456;
+        when_modified $a, sub { $out = $_[0] };
+        $a = 789;
+        is($out, 789, "when_modified");
+        $a = 'abc';
+        is($out, 'abc', "when_modified");
+
+        when_freed $a, sub { $out = "freed $_[0]" };
+    }
+    is($out, 'freed abc', 'when_freed');
 }

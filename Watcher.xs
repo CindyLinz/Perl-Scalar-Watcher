@@ -18,7 +18,7 @@ static SV * extract_cv(pTHX_ SV * sv){
     return cv;
 }
 
-static int modified_handler(pTHX_ SV * sv, MAGIC * mg){
+static int watcher_handler(pTHX_ SV * sv, MAGIC * mg){
     dSP;
     SV * handler = mg->mg_obj;
 
@@ -31,15 +31,11 @@ static int modified_handler(pTHX_ SV * sv, MAGIC * mg){
     return 0;
 }
 
-static int freed_handler(pTHX_ SV * sv, MAGIC * mg){
-    return 0;
-}
-
 static MGVTBL modified_vtbl = {
-    0, modified_handler, 0, 0, 0
+    0, watcher_handler, 0, 0, 0
 };
 static MGVTBL freed_vtbl = {
-    0, 0, 0, 0, freed_handler
+    0, 0, 0, 0, watcher_handler
 };
 
 MODULE = Scalar::Watcher		PACKAGE = Scalar::Watcher		
