@@ -8,10 +8,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 17;
+use Test::More tests => 28;
 BEGIN {
     use_ok('Scalar::Watcher');
-    Scalar::Watcher->import(qw(when_modified));
+    Scalar::Watcher->import(qw(when_modified when_destroyed));
 };
 
 #########################
@@ -19,27 +19,31 @@ BEGIN {
 # Insert your test code below, the Test::More module is use()ed here so read
 # its man page ( perldoc Test::More ) for help writing this test script.
 
-my @out;
 {
-    my $out;
     {
-        my $a = 123;
-        $a = 456;
-        when_modified $a, sub { $out = $_[0] };
-        $a = 789;
-        is($out, 789, "when_modified");
-        $a = 'abc';
-        is($out, 'abc', "when_modified");
+        my $out;
+        {
+            my $a = 123;
+            $a = 456;
+            when_modified $a, sub { $out = $_[0] };
+            when_destroyed $a, sub { $out = "XX $_[0]" };
+            $a = 789;
+            is($out, 789, "when_modified");
+            $a = 'abc';
+            is($out, 'abc', "when_modified");
+        }
+        is($out, 'XX abc', "when_destroyed");
     }
 
     {
+        my $out;
         my $a = 345;
-        my $canceller = when_modified $a, sub { $out = $_[0] };
+        my $canceller = when_modified $a, sub { $out = -$_[0] };
         $a = 678;
-        is($out, 678, "before cancel");
+        is($out, -678, "before cancel");
         undef $canceller;
         $a = 876;
-        is($out, 678, "after cancel");
+        is($out, -678, "after cancel");
     }
 
     {
@@ -74,5 +78,47 @@ my @out;
         $a = 678;
         is($out1, 678, 'Double 3-1');
         is($out2, 789, 'Double 3-2');
+    }
+
+    {
+        my $out;
+        my $array_ref;
+        {
+            my @array = (1..5,[3..5]);
+            when_modified $array[2], sub { $out = $_[0] };
+            when_destroyed $array[2], sub { $out = "XX $_[0]" };
+            when_destroyed $array[5][2], sub { $out = "YY $_[0]" };
+            is($out, undef, 'before array entry');
+            $array[2] = 3;
+            is($out, 3, 'after array entry');
+            $array[5] = undef;
+            is($out, "YY 5", 'after array replaced');
+
+            $array_ref = \@array;
+        }
+        is($out, "YY 5", 'before array destroy');
+        undef $array_ref;
+        is($out, "XX 3", 'after array destroy');
+    }
+
+    {
+        my $out;
+        my $hash_ref;
+        {
+            my %hash = ( a => 1, b => 2, c => { x => 5 } );
+            when_modified $hash{b}, sub { $out = $_[0] };
+            when_destroyed $hash{b}, sub { $out = "XX $_[0]" };
+            when_destroyed $hash{c}{x}, sub { $out = "YY $_[0]" };
+            is($out, undef, 'before hash entry');
+            $hash{b} = 3;
+            is($out, 3, 'after hash entry');
+            $hash{c} = { y => 5 };
+            is($out, "YY 5", 'after hash replaced');
+
+            $hash_ref = \%hash;
+        }
+        is($out, "YY 5", 'before hash destroy');
+        undef $hash_ref;
+        is($out, "XX 3", 'after hash destroy');
     }
 }

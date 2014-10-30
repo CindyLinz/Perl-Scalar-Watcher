@@ -36,6 +36,9 @@ static int watcher_handler(pTHX_ SV * sv, MAGIC * mg){
 static MGVTBL modified_vtbl = {
     0, watcher_handler, 0, 0, 0
 };
+static MGVTBL destroyed_vtbl = {
+    0, 0, 0, 0, watcher_handler
+};
 
 static int canceller_handler(pTHX_ SV * canceller, MAGIC * mg){
     SV * target = SvRV(canceller);
@@ -62,6 +65,21 @@ static MGVTBL canceller_vtbl = {
     0, 0, 0, 0, canceller_handler
 };
 
+void hook_watcher_magic(pTHX_ SV * target, SV * handler, MGVTBL * vtbl){
+    dSP;
+    SV * handler_cv = extract_cv(aTHX_ handler);
+    SvUPGRADE(target, SVt_PVMG);
+    sv_magicext(target, handler_cv, PERL_MAGIC_ext, vtbl, NULL, 0);
+
+    if( GIMME_V!=G_VOID ){
+        SV * canceller = newRV_inc(target);
+        sv_rvweaken(canceller);
+        sv_magicext(canceller, NULL, PERL_MAGIC_ext, &canceller_vtbl, (char *)handler_cv, 0);
+        PUSHs(sv_2mortal(newRV_noinc(canceller)));
+        PUTBACK;
+    }
+}
+
 MODULE = Scalar::Watcher		PACKAGE = Scalar::Watcher		
 
 INCLUDE: const-xs.inc
@@ -70,13 +88,12 @@ void
 when_modified(SV * target, SV * handler)
     PROTOTYPE: $&
     PPCODE:
-        SV * handler_cv = extract_cv(aTHX_ handler);
-        SvUPGRADE(target, SVt_PVMG);
-        sv_magicext(target, handler_cv, PERL_MAGIC_ext, &modified_vtbl, NULL, 0);
+        hook_watcher_magic(aTHX_ target, handler, &modified_vtbl);
+        SPAGAIN;
 
-        if( GIMME_V!=G_VOID ){
-            SV * canceller = newRV_inc(target);
-            sv_rvweaken(canceller);
-            sv_magicext(canceller, NULL, PERL_MAGIC_ext, &canceller_vtbl, (char *)handler_cv, 0);
-            PUSHs(sv_2mortal(newRV_noinc(canceller)));
-        }
+void
+when_destroyed(SV * target, SV * handler)
+    PROTOTYPE: $&
+    PPCODE:
+        hook_watcher_magic(aTHX_ target, handler, &destroyed_vtbl);
+        SPAGAIN;
