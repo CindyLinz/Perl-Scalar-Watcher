@@ -12,7 +12,7 @@ our @ISA = qw(Exporter);
 
 our @EXPORT_OK = qw(when_modified when_destroyed);
 
-our $VERSION = '0.002';
+our $VERSION = '0.002001';
 
 require XSLoader;
 XSLoader::load('Scalar::Watcher', $VERSION);
@@ -30,7 +30,7 @@ Scalar::Watcher - watch a scalar variable when setting value or destroying it
 
 =head1 SYNOPSIS
 
-  use Scalar::Watcher qw(when_modified when_destroy);
+  use Scalar::Watcher qw(when_modified when_destroyed);
 
   {
     my $a = 123;

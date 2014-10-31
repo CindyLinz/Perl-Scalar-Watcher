@@ -5,47 +5,47 @@ Scalar::Watcher - watch a scalar variable when setting value or destroying it
 # SYNOPSIS
 
 ```perl
-    use Scalar::Watcher qw(when_modified when_destroy);
+use Scalar::Watcher qw(when_modified when_destroyed);
 
-    {
-      my $a = 123;
-      $a = 456;
-      when_modified $a, sub { print "catch $_[0]\n" };
-      when_destroyed $a, sub { print "destroy $_[0]\n" };
-      $a = 'oo';
-      $a = 567;
+{
+  my $a = 123;
+  $a = 456;
+  when_modified $a, sub { print "catch $_[0]\n" };
+  when_destroyed $a, sub { print "destroy $_[0]\n" };
+  $a = 'oo';
+  $a = 567;
 
-      # then you'll get
-      # catch oo
-      # catch 567
-      # destroy 567
-    }
+  # then you'll get
+  # catch oo
+  # catch 567
+  # destroy 567
+}
 
-    {
-      # or with a canceller
-      my $a = 123;
-      my $canceller = when_modified $a, sub { print "catch $_[0]\n" };
-      my $canceller2 = when_destroyed $a, sub { print "destroy $_[0]\n" };
-      $a = 456;
-      undef $canceller;
-      $a = 789;
-      undef $canceller2;
+{
+  # or with a canceller
+  my $a = 123;
+  my $canceller = when_modified $a, sub { print "catch $_[0]\n" };
+  my $canceller2 = when_destroyed $a, sub { print "destroy $_[0]\n" };
+  $a = 456;
+  undef $canceller;
+  $a = 789;
+  undef $canceller2;
 
-      # then you'll get
-      # catch 456
-    }
+  # then you'll get
+  # catch 456
+}
 
-    {
-      # you can bind multiple watchers on one variable
-      my $a = 123;
-      my $canceller1 = when_modified $a, sub { ... };
-      my $canceller2 = when_modified $a, sub { ... };
-      $a = 456;
+{
+  # you can bind multiple watchers on one variable
+  my $a = 123;
+  my $canceller1 = when_modified $a, sub { ... };
+  my $canceller2 = when_modified $a, sub { ... };
+  $a = 456;
 
-      # and turn off one of them at anytime
-      undef $canceller1;
-      $a = 789;
-    }
+  # and turn off one of them at anytime
+  undef $canceller1;
+  $a = 789;
+}
 ```
 
 # DESCRIPTION
